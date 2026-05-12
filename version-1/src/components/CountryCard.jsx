@@ -1,7 +1,10 @@
 function CountryCard({ country }) {
   return (
     <div className="country-card">
-      <img src={country.flags.png} alt={`Flag of ${country.name.common}`} />
+   <img
+  src={country.flags?.svg || country.flags?.png || "https://via.placeholder.com/150"}
+  alt={`Flag of ${country.name.common}`}
+/>
 
       <h2>{country.name.common}</h2>
 

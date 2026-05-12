@@ -15,8 +15,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 32px;
-  background-color: #ffffff;
+  padding: 16px 24px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
 }
 
@@ -25,6 +24,12 @@ body {
   font-weight: 800;
   color: #111517;
   text-decoration: none;
+}
+
+.nav-right {
+  display: flex;
+  gap: 16px;
+  align-items: center;
 }
 
 .navbar a {
@@ -77,4 +82,90 @@ body {
   font-size: 14px;
   margin: 4px 16px;
   color: #111517;
+}
+
+/* saved countries form */
+
+.saved-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px;
+  font-family: Arial, sans-serif;
+}
+
+.saved-container h1 {
+  margin-bottom: 20px;
+}
+
+.saved-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 320px;
+  padding: 20px;
+  border-radius: 10px;
+  background-color: #f5f5f5;
+}
+
+.saved-form input,
+.saved-form textarea {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.saved-form textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+.saved-form button {
+  padding: 10px;
+  border: none;
+  border-radius: 6px;
+  background-color: #2c3e50;
+  color: white;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.saved-form button:hover {
+  background-color: #1a242f;
+}
+
+/* search input */
+
+.search-input {
+  width: 300px;
+  padding: 10px 14px;
+  margin: 20px auto;
+  display: block;
+
+  border: 1px solid #ccc;
+  border-radius: 8px;
+
+  font-size: 14px;
+  outline: none;
+
+  transition: 0.2s ease;
+}
+
+.search-input:focus {
+  border-color: #2c3e50;
+  box-shadow: 0 0 0 2px rgba(44, 62, 80, 0.2);
+}
+
+/* light/dark mode */
+
+.app {
+  min-height: 100vh;
+  background: white;
+  color: black;
+}
+
+.app.dark {
+  background: #121212;
+  color: white;
 }
