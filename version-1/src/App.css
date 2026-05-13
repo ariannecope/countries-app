@@ -169,3 +169,48 @@ body {
   background: #121212;
   color: white;
 }
+
+/* countries detail page */
+.country-detail {
+  padding: 20px;
+}
+
+/* Back + Save buttons */
+.top-buttons {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+/* DESKTOP layout */
+.country-content {
+  display: flex;
+  gap: 40px;
+  align-items: flex-start;
+}
+
+/* Flag */
+.flag-container img {
+  width: 100%;
+  max-width: 450px;
+  height: auto;
+  display: block;
+}
+
+/* Text */
+.country-info {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* MOBILE layout */
+@media (max-width: 768px) {
+  .country-content {
+    flex-direction: column;
+  }
+
+  .flag-container img {
+    max-width: 100%;
+  }
+}

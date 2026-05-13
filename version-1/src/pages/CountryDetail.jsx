@@ -24,25 +24,35 @@ function CountryDetail({ countries = [], savedCountries = [], setSavedCountries 
     }
   }
 
-  return (
-    <div>
-      <div style={{ display: "flex", gap: "10px" }}>
-        <button onClick={() => navigate(-1)}>← Back</button>
+return (
+  <div className="country-detail">
 
-        <button onClick={toggleSave}>
-          {isSaved ? "Unsave" : "Save"}
-        </button>
+    <div className="top-buttons">
+      <button onClick={() => navigate(-1)}>← Back</button>
+
+      <button onClick={toggleSave}>
+        {isSaved ? "Unsave" : "Save"}
+      </button>
+    </div>
+
+    <div className="country-content">
+
+      <div className="flag-container">
+        <img src={country.flags.svg} alt={country.name.common} />
       </div>
 
-      <h1>{country.name.common}</h1>
+      <div className="country-info">
+        <h1>{country.name.common}</h1>
 
-      <img src={country.flags.svg} alt={country.name.common} />
+        <p><strong>Population:</strong> {country.population}</p>
+        <p><strong>Region:</strong> {country.region}</p>
+        <p><strong>Capital:</strong> {country.capital?.[0]}</p>
+      </div>
 
-      <p>Population: {country.population}</p>
-      <p>Region: {country.region}</p>
-      <p>Capital: {country.capital?.[0]}</p>
     </div>
-  );
+
+  </div>
+);
 }
 
 export default CountryDetail;
