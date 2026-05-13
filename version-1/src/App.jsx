@@ -8,6 +8,7 @@ import localData from './localData';
 function App() {
   const [darkMode, setDarkMode] = useState(false);
   const [countries, setCountries] = useState([]);
+  const [savedCountries, setSavedCountries] = useState([]);
 
   const getCountriesData = async () => {
     try {
@@ -56,7 +57,17 @@ function App() {
       <Routes>
         <Route path="/" element={<Home countriesData={countries} />} />
         <Route path="/saved" element={<SavedCountries />} />
-        <Route path="/country/:name" element={<CountryDetail />} />
+        <Route path="/country/:code" element={<CountryDetail countries={countries} />} />
+        <Route
+  path="/country/:code"
+  element={
+    <CountryDetail
+      countries={countries}
+      savedCountries={savedCountries}
+      setSavedCountries={setSavedCountries}
+    />
+  }
+/>
       </Routes>
 
     </div>
