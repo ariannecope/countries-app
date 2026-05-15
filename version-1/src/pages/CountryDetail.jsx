@@ -35,7 +35,7 @@ function CountryDetail({
   // Check whether this country is already saved
   // .some() returns true or false
   //cca3 is a property from the country data itself. It stands for: Country Code Alpha-3
-  
+
   const isSaved = savedCountries.some(
     c => c.cca3 === country.cca3
   );
@@ -62,6 +62,11 @@ function CountryDetail({
       ]);
     }
   }
+
+  // This loops through the border codes, finds matching country objets, and removes any undefined results with filter(Boolean)
+  const borderCountries = country?.borders?.map((borderCode) => {
+  return countries.find((c) => c.cca3 === borderCode);
+}).filter(Boolean);
 
   return (
     <div className="country-detail">
@@ -109,6 +114,39 @@ function CountryDetail({
             <strong>Capital:</strong> {country.capital?.[0]}
           </p>
 
+          {/* Adding the border countries as clickable links. 
+          --If this country has border countries, show a list.
+          Otherwise, show None.”*/}
+<p>
+  <strong>Border Countries:</strong>
+</p>
+
+<p>
+  <strong>Border Countries:</strong>
+</p>
+{/* This code block: If this country has neighbors:
+→ loop through them
+→ display each one as a clickable link
+→ clicking takes you to that country page
+
+If it has no neighbors:
+→ show “None” 
+conditional statement ?. checks if the border countries exist. .length is how many items are in the array. The .map() turns it into readable jsx. (borderCountry) => ( means: “for each country in the array, call it borderCountry and render something”*/}
+{borderCountries?.length ? (
+  <ul>
+    {borderCountries.map((borderCountry) => (
+      <li
+        key={borderCountry.cca3}
+        onClick={() => navigate(`/country/${borderCountry.cca3}`)}
+        style={{ cursor: "pointer", textDecoration: "underline" }}
+      >
+        {borderCountry.name.common}
+      </li>
+    ))}
+  </ul>
+) : (
+  <p>None</p>
+)}
         </div>
       </div>
     </div>

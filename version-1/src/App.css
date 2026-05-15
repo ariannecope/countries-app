@@ -34,8 +34,12 @@ body {
 
 .navbar a {
   text-decoration: none;
-  color: #111517;
+  color: inherit;
   font-weight: 600;
+}
+
+.navbar a:hover {
+  text-decoration: underline;
 }
 
 /* -------------------- */
@@ -213,4 +217,25 @@ body {
   .flag-container img {
     max-width: 100%;
   }
+}
+/* filter by region drop down */
+.filter-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 20px 0;
+}
+
+.filter-container label {
+  font-weight: bold;
+  margin: 10px;
+}
+
+.filter-container select {
+  width: 220px;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 16px;
+  margin: 10px;
 }

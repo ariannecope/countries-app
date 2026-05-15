@@ -3,35 +3,64 @@ import { useState } from "react";
 
 function Home({ countriesData }) {
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedRegion, setSelectedRegion] = useState("");
 
   // Sort countries A → Z
   const sortedCountries = [...countriesData].sort((a, b) =>
     a.name.common.localeCompare(b.name.common)
   );
 
-  // Filter based on search input
-  const filteredCountries = sortedCountries.filter((country) =>
-    country.name.common.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Filter based on search input and also for region
+const filteredCountries = sortedCountries.filter((country) => {
+  // this checks “Does the country name include the typed text?”
+  const matchesSearch = country.name.common
+    .toLowerCase()
+    .includes(searchTerm.toLowerCase());
+// region filter--if no region selected ("") → allow everything
+// otherwise → only allow matching regions
+  const matchesRegion =
+    selectedRegion === "" || country.region === selectedRegion;
+// final return--“Only keep countries that pass BOTH filters.”
+  return matchesSearch && matchesRegion;
+});
 
   return (
     <div>
-      {/* Search Bar */}
-      <input
-        className="search-input"
-        type="text"
-        placeholder="Search for a country..."
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-      />
+  {/* drop down for region filter */}
+  <div className="filter-container">
+    <label htmlFor="region-filter">Filter by Region</label>
 
-      {/* Countries Grid */}
-      <div className="countries-container">
-        {filteredCountries.map((country) => (
-          <CountryCard key={country.cca3} country={country} />
-        ))}
-      </div>
-    </div>
+    <select
+      id="region-filter"
+      value={selectedRegion}
+      onChange={(event) => setSelectedRegion(event.target.value)}
+    >
+      <option value="">All Regions</option>
+      <option value="Asia">Asia</option>
+      <option value="Europe">Europe</option>
+      <option value="Africa">Africa</option>
+      <option value="Oceania">Oceania</option>
+      <option value="Americas">Americas</option>
+      <option value="Antarctic">Antarctic</option>
+    </select>
+  </div>
+
+  {/* Search Bar */}
+  <input
+    className="search-input"
+    type="text"
+    placeholder="Search for a country..."
+    value={searchTerm}
+    onChange={(e) => setSearchTerm(e.target.value)}
+  />
+
+  {/* Countries Grid */}
+  <div className="countries-container">
+    {filteredCountries.map((country) => (
+      <CountryCard key={country.cca3} country={country} />
+    ))}
+  </div>
+</div>
   );
 }
 

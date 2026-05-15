@@ -44,21 +44,22 @@ function App() {
       setCountries(data);
 
     } catch (error) {
-      // If API fails, use local backup data instead
+      // If API fails, use local backup data instead, and print the actual error in the console so we can debug it.
       console.error('API failed, using local data instead:', error);
       setCountries(localData);
     }
   };
-
+//The above async function by itself does nothing until something calls it.
+//Now we use useEffect to actually trigger the API call.
   // useEffect runs after component renders
   // Empty dependency array [] means:
-  // "Run only once when the app first loads"
+  // "Run only once when the app first loads, because we don't want endless Api calls"
   useEffect(() => {
     getCountriesData();
   }, []);
 
   return (
-    <div>
+    <div className={darkMode ? "app dark" : "app"}>
       {/* Navigation bar */}
       <nav className="navbar">
 
