@@ -25,7 +25,6 @@ function App() {
   // State to store user's saved countries
   const [savedCountries, setSavedCountries] = useState([]);
 
-
   // Async function to fetch country data from API
   // fields= limits which data we receive
   const getCountriesData = async () => {
