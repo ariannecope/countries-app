@@ -54,20 +54,20 @@ Example Request Body:
   "bio": "A little about Alice"
 }
 
-RESPONSE DATA TYPE: ------
+RESPONSE DATA TYPE: String
 RESPONSE: 
-Example Response: Success! User has been added.
+Example Response: "Success! User has been added."
 
 
-❓ WHEN: ------
+❓ WHEN: onSubmit--when user submits form
 
-❓ WHERE: ------
+❓ WHERE: Saved Countries page--SavedCountries.jsx call in handleSubmit function
 
 ❓ HOW:
-Step 1: ------
-Step 2: ------
-Step 3: ------
-Add more steps as needed!
+Step 1: User fills out form and clicks submit
+Step 2: handSubmit function runs, calls another function to do the API call/POST request
+Step 3: Async - await ... try -  catch
+Step 4: Send the post request
 
 ========================
 🔶 RETRIEVING FORM DATA
