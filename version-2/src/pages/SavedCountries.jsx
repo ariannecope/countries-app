@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 
 function SavedCountries() {
-  // state for newest saved user
+  // state for newest saved user, wth null for default value since data will be an object but hasn't loaded yet
   const [newUserName, setNewUserName] = useState(null);
 
-  // form state
+  // form state--initialized state with an object that matches the structure of the form fields
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -12,7 +12,7 @@ function SavedCountries() {
     bio: '',
   });
 
-  // GET request
+  // GET request--async function with try ... await ... catch pattern
   const getUserNewestInfo = async () => {
     try {
       const response = await fetch(
@@ -20,7 +20,7 @@ function SavedCountries() {
       );
 
       const data = await response.json();
-
+// grab the first user in the response array and save their name in the NewUserName state
       setNewUserName(data[0].name);
     } catch (error) {
       console.log('Error fetching newest user:', error);
@@ -38,16 +38,24 @@ function SavedCountries() {
   };
 
   // POST request
+  // async function sends new user data to the backend API
   const storeUserData = async (data) => {
     try {
+      // send POST request to backend endpoint
       const response = await fetch(
         'https://backend-answer-keys.onrender.com/add-one-user',
         {
+          // tell fetch this is a POST request
           method: 'POST',
+          // headers describe information about the request
           headers: {
+            // tell the backend we are sending JSON data
             'Content-Type': 'application/json',
           },
+       // body contains the data being sent to the server
+        // JSON.stringify converts the JavaScript object into JSON text
           body: JSON.stringify({
+            // match frontend form fields to backend database field names
             name: data.fullName,
             country_name: data.country,
             email: data.email,
@@ -56,6 +64,7 @@ function SavedCountries() {
         }
       );
 
+      // convert server response from JSON text into a JavaScript object
       const result = await response.json();
 
       console.log('User saved:', result);
@@ -85,20 +94,23 @@ function SavedCountries() {
     });
   };
 
-  // run once on page load
+  // run once on page load using the empty dependency array
   useEffect(() => {
     getUserNewestInfo();
   }, []);
 
-  return (
-    <div>
+ return (
+  <div className="page-wrapper">
+    <div className="saved-container">
       <h1>Saved Countries</h1>
 
       {newUserName && (
-        <h2>Welcome back, {newUserName}!</h2>
+        <h2 className="welcome">
+          Welcome back, {newUserName}!
+        </h2>
       )}
 
-      <form onSubmit={handleSubmit}>
+      <form className="saved-form" onSubmit={handleSubmit}>
         <input
           type="text"
           name="fullName"
@@ -133,7 +145,7 @@ function SavedCountries() {
         <button type="submit">Save User</button>
       </form>
     </div>
-  );
+  </div>
+);
 }
-
 export default SavedCountries;
