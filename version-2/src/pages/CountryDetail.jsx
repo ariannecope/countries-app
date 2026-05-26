@@ -1,15 +1,30 @@
 import { useParams, useNavigate } from "react-router-dom";
+import { useState } from "react";
 
 // CountryDetail component
 // Receives props from App.jsx
 // if countries is missing → use an empty array []
 // if savedCountries is missing → use an empty array []
-// if setSavedCountries is missing → use an empty function--a tiny “do nothing” function that prevents crashes. This is mostly a safety net while developing. In a finished app, you often don't need defaults for state setter functions if you're sure the prop will always exist.
+// if setSavedCountries is missing → use an empty function
+// This is mostly a safety net while developing.
+
 function CountryDetail({ 
   countries = [], 
   savedCountries = [], 
   setSavedCountries = () => {} 
 }) {
+
+  // ====================
+  // STATE
+  // ====================
+
+  // Message displayed after saving a country
+  const [message, setMessage] = useState("")
+
+
+  // ====================
+  // ROUTER
+  // ====================
 
   // useParams grabs the "code" value from the URL
   // Example route: /country/USA
@@ -18,6 +33,11 @@ function CountryDetail({
 
   // useNavigate lets us move the user to another page
   const navigate = useNavigate();
+
+
+  // ====================
+  // DERIVED VALUES
+  // ====================
 
   // Find the country object whose cca3 matches the URL code
   const country = countries.find(c => c.cca3 === code);
@@ -34,11 +54,24 @@ function CountryDetail({
 
   // Check whether this country is already saved
   // .some() returns true or false
-  //cca3 is a property from the country data itself. It stands for: Country Code Alpha-3
-
   const isSaved = savedCountries.some(
     c => c.cca3 === country.cca3
   );
+
+  // BORDER COUNTRIES:
+  // This loops through border country codes,
+  // finds matching country objects,
+  // and removes undefined values with filter(Boolean)
+  const borderCountries = country?.borders
+    ?.map((borderCode) => {
+      return countries.find((c) => c.cca3 === borderCode);
+    })
+    .filter(Boolean);
+
+
+  // ====================
+  // FUNCTIONS
+  // ====================
 
   // Add or remove country from savedCountries
   function toggleSave() {
@@ -63,10 +96,56 @@ function CountryDetail({
     }
   }
 
-  // This loops through the border codes, finds matching country objets, and removes any undefined results with filter(Boolean)
-  const borderCountries = country?.borders?.map((borderCode) => {
-  return countries.find((c) => c.cca3 === borderCode);
-}).filter(Boolean);
+  // POST REQUEST:
+  // Save country to backend
+  async function handleSave() {
+
+    // If already saved → unsave it
+    if (isSaved) {
+
+      toggleSave();
+
+      // Clear success message
+      setMessage("");
+
+      return;
+    }
+
+    // Otherwise save it
+    try {
+
+      const response = await fetch(
+        "https://backend-answer-keys.onrender.com/save-one-country",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            country_name: country.name.common
+          })
+        }
+      );
+
+      const data = await response.text();
+
+      // Display success message
+      setMessage(data);
+
+      // Update local saved countries state
+      toggleSave();
+
+    } catch (error) {
+
+      console.log(error);
+
+    }
+  }
+
+
+  // ====================
+  // JSX / UI
+  // ====================
 
   return (
     <div className="country-detail">
@@ -79,11 +158,15 @@ function CountryDetail({
           ← Back
         </button>
 
-        {/* Save or unsave country */}
-        <button onClick={toggleSave}>
+        {/* Save / Unsave button */}
+        <button onClick={handleSave}>
           {isSaved ? "Unsave" : "Save"}
         </button>
+
       </div>
+
+      {/* Display message when country is saved */}
+      {message && <p>{message}</p>}
 
       <div className="country-content">
 
@@ -114,39 +197,45 @@ function CountryDetail({
             <strong>Capital:</strong> {country.capital?.[0]}
           </p>
 
-          {/* Adding the border countries as clickable links. 
-          --If this country has border countries, show a list.
-          Otherwise, show None.”*/}
-<p>
-  <strong>Border Countries:</strong>
-</p>
+          {/* Border countries heading */}
+          <p>
+            <strong>Border Countries:</strong>
+          </p>
 
-<p>
-  <strong>Border Countries:</strong>
-</p>
-{/* This code block: If this country has neighbors:
-→ loop through them
-→ display each one as a clickable link
-→ clicking takes you to that country page
+          {/* 
+            If this country has neighbors:
+            → loop through them
+            → display each one as clickable
+            → clicking navigates to that country page
 
-If it has no neighbors:
-→ show “None” 
-conditional statement ?. checks if the border countries exist. .length is how many items are in the array. The .map() turns it into readable jsx. (borderCountry) => ( means: “for each country in the array, call it borderCountry and render something”*/}
-{borderCountries?.length ? (
-  <ul>
-    {borderCountries.map((borderCountry) => (
-      <li
-        key={borderCountry.cca3}
-        onClick={() => navigate(`/country/${borderCountry.cca3}`)}
-        style={{ cursor: "pointer", textDecoration: "underline" }}
-      >
-        {borderCountry.name.common}
-      </li>
-    ))}
-  </ul>
-) : (
-  <p>None</p>
-)}
+            Otherwise:
+            → show "None"
+          */}
+          {borderCountries?.length ? (
+
+            <ul>
+              {borderCountries.map((borderCountry) => (
+
+                <li
+                  key={borderCountry.cca3}
+                  onClick={() => navigate(`/country/${borderCountry.cca3}`)}
+                  style={{
+                    cursor: "pointer",
+                    textDecoration: "underline"
+                  }}
+                >
+                  {borderCountry.name.common}
+                </li>
+
+              ))}
+            </ul>
+
+          ) : (
+
+            <p>None</p>
+
+          )}
+
         </div>
       </div>
     </div>

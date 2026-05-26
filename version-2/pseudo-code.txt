@@ -136,6 +136,7 @@ POST https://backend-answer-keys.onrender.com/save-one-country
 
 REQUEST BODY DATA TYPE (if applicable): object
 REQUEST BODY (if applicable): 
+
 Example Request Body:
 
 {
@@ -148,39 +149,92 @@ RESPONSE DATA TYPE: string
 RESPONSE: Example Response:
 Success! The country is saved.
 
-❓ WHEN: ------
+❓ WHEN: when the user clicks the save button on the country details page
 
-❓ WHERE: ------
+❓ WHERE: country detail page
 
 ❓ HOW:
-Step 1: ------
-Step 2: ------
-Step 3: ------
-Add more steps as needed!
+User clicks save button on country details page -- 
 
+Step 1: Create Form state 
+//for the data we're sending to backend
+const [savedCountry, setSavedCountry] = useState({
+  country_name: ""
+})
+//create response state--for return message
+const [message, setMessage] = useState("")
+
+Step 2: handleSubmit function runs when user clicks save button(may not be necessary if the country detail page alreadys knows the selected country we might be able to use it directly in the fetch)
+Step 3: Inside handleSubmit:
+- async/await
+- try/catch
+- fetch POST request
+- add headers
+- JSON.stringify(body)
+add headers, stringify the body
+Step 4: Save returned response data
+setMessage(data);
+
+
+========================
 ========================
 🔶 RETRIEVING SAVED COUNTRIES DATA
 ========================
 
 ❓ WHAT...
-TYPE OF HTTP REQUEST (GET OR POST): ------
-API ENDPOINT: ------
 
-REQUEST BODY DATA TYPE (if applicable): ------
-REQUEST BODY (if applicable): ------
+TYPE OF HTTP REQUEST:
+GET
 
-RESPONSE DATA TYPE: ------
-RESPONSE: ------
+API ENDPOINT:
+/get-all-saved-countries
 
-❓ WHEN: ------
+REQUEST BODY:
+None
 
-❓ WHERE: ------
+RESPONSE DATA TYPE:
+Array of objects
+
+EXAMPLE RESPONSE:
+
+[
+  {
+    "country_name": "Japan"
+  },
+  {
+    "country_name": "Germany"
+  }
+]
+
+❓ WHEN:
+When the Saved Countries page loads
+
+❓ WHERE:
+SavedCountries page
 
 ❓ HOW:
-Step 1: ------
-Step 2: ------
-Step 3: ------
-Add more steps as needed!
+
+Step 1:
+Create state to store saved countries
+
+const [savedCountries, setSavedCountries] = useState([])
+
+Step 2:
+useEffect runs when component loads
+
+Step 3:
+Fetch GET request to backend
+
+Step 4:
+Convert response to JSON
+
+Step 5:
+Store response data in state
+
+setSavedCountries(data)
+
+Step 6:
+Map through savedCountries and display them
 
 =================================
 📊 COUNTRY COUNTS DATA
@@ -192,21 +246,79 @@ Add more steps as needed!
 NOTE: We combine storing & retrieving country counts data into one section because they always happen together. Each time we look up a country’s view count, we also need to increase it and save the new total.
 
 ❓ WHAT...
-TYPE OF HTTP REQUEST (GET OR POST): ------
-API ENDPOINT: ------
+TYPE OF HTTP REQUEST (GET OR POST): POST
+API ENDPOINT: /update-one-country-count
 
-REQUEST BODY DATA TYPE (if applicable): ------
-REQUEST BODY (if applicable): ------
+This endpoint is doing TWO jobs at once:
 
-RESPONSE DATA TYPE: ------
-RESPONSE: ------
+incrementing the count
+returning the updated count
 
-❓ WHEN: ------
+That’s why a POST request makes sense even though you’re also retrieving data.
 
-❓ WHERE: ------
+REQUEST BODY DATA TYPE (if applicable): object
+REQUEST BODY (if applicable): 
+{
+  "country_name": "France"
+}
+
+
+RESPONSE DATA TYPE: object
+RESPONSE: 
+
+{
+  "count": 3
+}
+
+
+❓ WHEN: when country details page loads after a particular country is clicked on the home page
+
+❓ WHERE: country details page
 
 ❓ HOW:
-Step 1: ------
-Step 2: ------
-Step 3: ------
-Add more steps as needed!
+Step 1:
+Create state to store the country view count
+
+const [countryCount, setCountryCount] = useState(0)
+
+Step 2:
+When the Country Detail page loads,
+run a function to update the count in the backend
+
+Step 3:
+Use async/await with try/catch
+
+Step 4:
+Send POST request to:
+
+/update-one-country-count
+
+Step 5:
+Add request headers
+
+headers: {
+  "Content-Type": "application/json"
+}
+
+Step 6:
+Send country name in request body
+
+body: JSON.stringify({
+  country_name: country.name.common
+})
+
+Step 7:
+Convert response data to JavaScript
+
+const data = await response.json()
+
+Step 8:
+Store returned count in state
+
+setCountryCount(data.count)
+
+Step 9:
+Display the count on the Country Detail page
+
+Example:
+This country has been viewed 3 times.
