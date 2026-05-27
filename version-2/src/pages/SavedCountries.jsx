@@ -1,118 +1,150 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
+import CountryCard from "../components/CountryCard";
 
-function SavedCountries() {
-  // state for newest saved user, wth null for default value since data will be an object but hasn't loaded yet
+function SavedCountries({ countries = [] }) {
+
+  // ====================
+  // STATE
+  // ====================
+  const [savedCodes, setSavedCodes] = useState([]);
   const [newUserName, setNewUserName] = useState(null);
 
-  // form state--initialized state with an object that matches the structure of the form fields
   const [formData, setFormData] = useState({
-    fullName: '',
-    email: '',
-    country: '',
-    bio: '',
+    fullName: "",
+    email: "",
+    country: "",
+    bio: ""
   });
 
-  // GET request--async function with try ... await ... catch pattern
-  const getUserNewestInfo = async () => {
+  const [loading, setLoading] = useState(true);
+
+  // ====================
+  // GET SAVED COUNTRIES
+  // ====================
+  const getSavedCountries = async () => {
     try {
       const response = await fetch(
-        'https://backend-answer-keys.onrender.com/get-newest-user'
+        "https://backend-answer-keys.onrender.com/get-all-saved-countries"
       );
 
       const data = await response.json();
-// grab the first user in the response array and save their name in the NewUserName state
-      setNewUserName(data[0].name);
+      setSavedCodes(data);
+
     } catch (error) {
-      console.log('Error fetching newest user:', error);
+      console.log("Error fetching saved countries:", error);
     }
   };
 
-  // update state as user types
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
+  // ====================
+  // GET NEWEST USER
+  // ====================
+  const getUserNewestInfo = async () => {
+    try {
+      const response = await fetch(
+        "https://backend-answer-keys.onrender.com/get-newest-user"
+      );
 
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
+      const data = await response.json();
+      setNewUserName(data[0].name);
+
+    } catch (error) {
+      console.log("Error fetching newest user:", error);
+    }
   };
 
-  // POST request
-  // async function sends new user data to the backend API
+  // ====================
+  // POST USER
+  // ====================
   const storeUserData = async (data) => {
     try {
-      // send POST request to backend endpoint
-      const response = await fetch(
-        'https://backend-answer-keys.onrender.com/add-one-user',
+      await fetch(
+        "https://backend-answer-keys.onrender.com/add-one-user",
         {
-          // tell fetch this is a POST request
-          method: 'POST',
-          // headers describe information about the request
+          method: "POST",
           headers: {
-            // tell the backend we are sending JSON data
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json"
           },
-       // body contains the data being sent to the server
-        // JSON.stringify converts the JavaScript object into JSON text
           body: JSON.stringify({
-            // match frontend form fields to backend database field names
             name: data.fullName,
             country_name: data.country,
             email: data.email,
-            bio: data.bio,
-          }),
+            bio: data.bio
+          })
         }
       );
 
-      // convert server response from JSON text into a JavaScript object
-      const result = await response.json();
-
-      console.log('User saved:', result);
-
-      // refresh newest user after saving
       getUserNewestInfo();
 
     } catch (error) {
-      console.log('Error saving user:', error);
+      console.log("Error saving user:", error);
     }
   };
 
-  // form submit
+  // ====================
+  // FORM HANDLERS
+  // ====================
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-
-    console.log(formData);
-
     storeUserData(formData);
 
-    // clear form
     setFormData({
-      fullName: '',
-      email: '',
-      country: '',
-      bio: '',
+      fullName: "",
+      email: "",
+      country: "",
+      bio: ""
     });
   };
 
-  // run once on page load using the empty dependency array
+  // ====================
+  // USE EFFECT
+  // ====================
   useEffect(() => {
+    getSavedCountries();
     getUserNewestInfo();
+    setLoading(false);
   }, []);
 
- return (
-  <div className="page-wrapper">
+  // ====================
+  // DERIVED DATA
+  // ====================
+  const savedCountryObjects = countries.filter(country =>
+    savedCodes.some(saved =>
+      saved.country_name === country.name.common
+    )
+  );
+
+
+  // ====================
+  // LOADING / EMPTY STATES
+  // ====================
+  if (loading) {
+    return <div>Loading saved countries...</div>;
+  }
+
+  // ====================
+  // UI
+  // ====================
+  return (
     <div className="saved-container">
+
       <h1>Saved Countries</h1>
 
       {newUserName && (
-        <h2 className="welcome">
-          Welcome back, {newUserName}!
-        </h2>
+        <h2>Welcome back, {newUserName}!</h2>
       )}
 
+      {/* ================= FORM ================= */}
       <form className="saved-form" onSubmit={handleSubmit}>
         <input
-          type="text"
           name="fullName"
           placeholder="Name"
           value={formData.fullName}
@@ -120,7 +152,6 @@ function SavedCountries() {
         />
 
         <input
-          type="email"
           name="email"
           placeholder="Email"
           value={formData.email}
@@ -128,7 +159,6 @@ function SavedCountries() {
         />
 
         <input
-          type="text"
           name="country"
           placeholder="Country"
           value={formData.country}
@@ -144,8 +174,23 @@ function SavedCountries() {
 
         <button type="submit">Save User</button>
       </form>
+
+      {/* ================= COUNTRIES ================= */}
+      <div className="countries-grid">
+        {savedCountryObjects.length ? (
+          savedCountryObjects.map(country => (
+            <CountryCard
+              key={country.cca3}
+              country={country}
+            />
+          ))
+        ) : (
+          <p>No saved countries yet.</p>
+        )}
+      </div>
+
     </div>
-  </div>
-);
+  );
 }
+
 export default SavedCountries;

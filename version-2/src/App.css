@@ -254,3 +254,19 @@ body {
   font-size: 24px;
   font-weight: 600;
 }
+//saved countries display
+
+.country-card {
+  transition: transform 0.2s ease;
+}
+
+.country-card:hover {
+  transform: translateY(-4px);
+}
+
+.countries-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  padding: 25px;
+}
