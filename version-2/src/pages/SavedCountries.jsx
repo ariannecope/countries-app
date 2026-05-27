@@ -1,196 +1,130 @@
-import { useState, useEffect } from "react";
-import CountryCard from "../components/CountryCard";
+import { useParams, useNavigate } from "react-router-dom";
 
-function SavedCountries({ countries = [] }) {
+function CountryDetail({
+  countries = [],
+  savedCountries = [],
+  setSavedCountries = () => {}
+}) {
+  const { code } = useParams();
+  const navigate = useNavigate();
 
-  // ====================
-  // STATE
-  // ====================
-  const [savedCodes, setSavedCodes] = useState([]);
-  const [newUserName, setNewUserName] = useState(null);
+  // ======================
+  // LOADING STATE
+  // ======================
+  // If countries haven't loaded yet from App.jsx API call
+  if (!countries.length) {
+    return <div>Loading countries...</div>;
+  }
 
-  const [formData, setFormData] = useState({
-    fullName: "",
-    email: "",
-    country: "",
-    bio: ""
-  });
+  // ======================
+  // FIND CURRENT COUNTRY
+  // ======================
+  // Match URL param (cca3 code) to full country object
+  const country = countries.find(c => c.cca3 === code);
 
-  const [loading, setLoading] = useState(true);
+  // If no match is found, show error state
+  if (!country) {
+    return <div>Country not found</div>;
+  }
 
-  // ====================
-  // GET SAVED COUNTRIES
-  // ====================
-  const getSavedCountries = async () => {
+  // ======================
+  // CHECK IF COUNTRY IS SAVED
+  // ======================
+  // This determines button text (Save vs Unsave)
+  const isSaved = savedCountries.some(
+    c => c.cca3 === country.cca3
+  );
+
+  // ======================
+  // SAVE / UNSAVE FUNCTION (POST + UI UPDATE)
+  // ======================
+  const handleSave = async () => {
     try {
-      const response = await fetch(
-        "https://backend-answer-keys.onrender.com/get-all-saved-countries"
-      );
 
-      const data = await response.json();
-      setSavedCodes(data);
+      // ======================
+      // UNSAVE FLOW
+      // ======================
+      if (isSaved) {
 
-    } catch (error) {
-      console.log("Error fetching saved countries:", error);
-    }
-  };
+        // 1. Update UI immediately (React state update)
+        // Removes country from saved list in memory
+        setSavedCountries(prev =>
+          prev.filter(c => c.cca3 !== country.cca3)
+        );
 
-  // ====================
-  // GET NEWEST USER
-  // ====================
-  const getUserNewestInfo = async () => {
-    try {
-      const response = await fetch(
-        "https://backend-answer-keys.onrender.com/get-newest-user"
-      );
-
-      const data = await response.json();
-      setNewUserName(data[0].name);
-
-    } catch (error) {
-      console.log("Error fetching newest user:", error);
-    }
-  };
-
-  // ====================
-  // POST USER
-  // ====================
-  const storeUserData = async (data) => {
-    try {
-      await fetch(
-        "https://backend-answer-keys.onrender.com/add-one-user",
-        {
+        // 2. Send POST request to backend to remove it from database
+        await fetch("/api/remove-country", {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
           },
           body: JSON.stringify({
-            name: data.fullName,
-            country_name: data.country,
-            email: data.email,
-            bio: data.bio
+            // This tells backend which country to remove
+            country_name: country.name.common
           })
-        }
-      );
+        });
 
-      getUserNewestInfo();
+        // Stop here so we don't also run save logic
+        return;
+      }
+
+      // ======================
+      // SAVE FLOW
+      // ======================
+
+      // 1. Send POST request to backend to save country
+      await fetch("/api/save-one-country", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          // This is the value stored in backend database
+          country_name: country.name.common
+        })
+      });
+
+      // 2. Update UI immediately so user sees change instantly
+      // Adds country to saved list in React state
+      setSavedCountries(prev => [...prev, country]);
 
     } catch (error) {
-      console.log("Error saving user:", error);
+      console.log("Error saving country:", error);
     }
   };
 
-  // ====================
-  // FORM HANDLERS
-  // ====================
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    storeUserData(formData);
-
-    setFormData({
-      fullName: "",
-      email: "",
-      country: "",
-      bio: ""
-    });
-  };
-
-  // ====================
-  // USE EFFECT
-  // ====================
-  useEffect(() => {
-    getSavedCountries();
-    getUserNewestInfo();
-    setLoading(false);
-  }, []);
-
-  // ====================
-  // DERIVED DATA
-  // ====================
-  const savedCountryObjects = countries.filter(country =>
-    savedCodes.some(saved =>
-      saved.country_name === country.name.common
-    )
-  );
-
-
-  // ====================
-  // LOADING / EMPTY STATES
-  // ====================
-  if (loading) {
-    return <div>Loading saved countries...</div>;
-  }
-
-  // ====================
+  // ======================
   // UI
-  // ====================
+  // ======================
   return (
-    <div className="saved-container">
+    <div className="country-detail">
 
-      <h1>Saved Countries</h1>
+      {/* Back button returns user to previous page */}
+      <button onClick={() => navigate(-1)}>
+        ← Back
+      </button>
 
-      {newUserName && (
-        <h2>Welcome back, {newUserName}!</h2>
-      )}
+      {/* Country name */}
+      <h1>{country.name.common}</h1>
 
-      {/* ================= FORM ================= */}
-      <form className="saved-form" onSubmit={handleSubmit}>
-        <input
-          name="fullName"
-          placeholder="Name"
-          value={formData.fullName}
-          onChange={handleInputChange}
-        />
+      {/* Country flag */}
+      <img
+        src={country.flags?.svg}
+        alt={country.name.common}
+      />
 
-        <input
-          name="email"
-          placeholder="Email"
-          value={formData.email}
-          onChange={handleInputChange}
-        />
+      {/* Basic country info */}
+      <p><strong>Region:</strong> {country.region}</p>
+      <p><strong>Population:</strong> {country.population}</p>
 
-        <input
-          name="country"
-          placeholder="Country"
-          value={formData.country}
-          onChange={handleInputChange}
-        />
-
-        <textarea
-          name="bio"
-          placeholder="Bio"
-          value={formData.bio}
-          onChange={handleInputChange}
-        />
-
-        <button type="submit">Save User</button>
-      </form>
-
-      {/* ================= COUNTRIES ================= */}
-      <div className="countries-grid">
-        {savedCountryObjects.length ? (
-          savedCountryObjects.map(country => (
-            <CountryCard
-              key={country.cca3}
-              country={country}
-            />
-          ))
-        ) : (
-          <p>No saved countries yet.</p>
-        )}
-      </div>
+      {/* Save / Unsave button */}
+      {/* Text changes dynamically based on whether country is saved */}
+      <button onClick={handleSave}>
+        {isSaved ? "Unsave" : "Save"}
+      </button>
 
     </div>
   );
 }
 
-export default SavedCountries;
+export default CountryDetail;
