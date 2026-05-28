@@ -27,4 +27,3 @@ function CountryCard({ country }) {
 }
 
 export default CountryCard;
-// Some countries might not have a capital ?. prevents your app from crashing

@@ -12,110 +12,119 @@ function CountryDetail({
     return <div>Loading countries...</div>;
   }
 
-  const country = countries.find(c => c.cca3 === code);
+  const country = countries.find((c) => c.cca3 === code);
 
   if (!country) {
     return <div>Country not found</div>;
   }
 
-  // check saved state safely (by code)
+  // check saved state safely
   const isSaved = savedCountries.some(
-    c => c.cca3 === country.cca3
+    (c) => c.cca3 === country.cca3
   );
 
   // ======================
-  // SAVE / UNSAVE FUNCTION
+  // SAVE FUNCTION
   // ======================
   const handleSave = async () => {
     try {
-
-      // =========================
-      // UNSAVE FLOW (REMOVE)
-      // =========================
-      // If the country is already saved, we treat this click as "unsave"
-      if (isSaved) {
-
-        // remove locally
-        // This immediately updates the UI so the country disappears from saved state
-        setSavedCountries(prev =>
-          prev.filter(c => c.cca3 !== country.cca3)
-        );
-
-        // optional: backend unsave endpoint (if you have one)
-        // This tells the backend to remove the country from the database
-        await fetch("/api/remove-country", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            country_name: country.name.common
-          })
-        });
-
-        // stop here so we do NOT also run save logic
-        return;
-      }
-
-      // =========================
-      // SAVE FLOW (ADD)
-      // =========================
-      // If the country is NOT already saved, we treat this click as "save"
-
-      // POST: save country to backend
-      await fetch("/api/save-one-country", {
+      await fetch("https://backend-answer-keys.onrender.com/save-one-country", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          // the data object being sent to the backend.
-          // this tells the backend which country to save
           country_name: country.name.common
         })
       });
 
-      // update UI immediately
-      // Before click:
-      // Save button says “Save”
-      // Country not in saved list
-      //
-      // After click:
-      // - state updates instantly
-      // - button flips to “Unsave”
-      // - SavedCountries page reflects change (if using same state)
-      //
-      // prev = current savedCountries array
-      // ...prev = keeps existing items
-      // country = adds new saved country
-      setSavedCountries(prev => [...prev, country]);
-
+      setSavedCountries((prev) => {
+        if (prev.some((c) => c.cca3 === country.cca3)) return prev;
+        return [...prev, country];
+      });
     } catch (error) {
       console.log("Error saving country:", error);
     }
   };
 
+   const borderCountries = country?.borders?.map((borderCode) => {
+  return countries.find((c) => c.cca3 === borderCode);
+}).filter(Boolean);                 
+
   return (
     <div className="country-detail">
 
-      <button onClick={() => navigate(-1)}>
-        ← Back
-      </button>
+      {/* ================= TOP BUTTONS ================= */}
+      <div className="top-buttons">
 
-      <h1>{country.name.common}</h1>
+        <button onClick={() => navigate("/")}>
+          ⬅ Back
+        </button>
 
-      <img
-        src={country.flags?.svg}
-        alt={country.name.common}
-      />
+        <button onClick={handleSave} disabled={isSaved}>
+          {isSaved ? "Saved ✓" : "Save Country"}
+        </button>
 
-      <p><strong>Region:</strong> {country.region}</p>
-      <p><strong>Population:</strong> {country.population}</p>
+      </div>
 
-      <button onClick={handleSave}>
-        {isSaved ? "Unsave" : "Save"}
-      </button>
+      {/* ================= MAIN CONTENT ================= */}
+      <div className="country-content">
 
+        {/* FLAG */}
+        <div className="flag-container">
+          <img
+            src={
+              country.flags?.svg ||
+              country.flags?.png ||
+              "https://via.placeholder.com/150"
+            }
+            alt={`Flag of ${country.name.common}`}
+          />
+        </div>
+
+        {/* INFO */}
+        <div className="country-info">
+          <h1>{country.name.common}</h1>
+
+          <p><strong>Population:</strong> {country.population}</p>
+          <p><strong>Region:</strong> {country.region}</p>
+          <p><strong>Capital:</strong> {country.capital?.[0]}</p>
+          <p><strong>Country Code:</strong> {country.cca3}</p>
+
+          <p>
+            <strong>Saved:</strong>{" "}
+            {isSaved ? "Yes" : "No"}
+          </p>
+
+{/* border countries */}
+{/* BORDER COUNTRIES */}
+<p>
+  <strong>Border Countries:</strong>
+</p>
+
+{borderCountries?.length ? (
+  <ul className="border-list">
+    {borderCountries.map((borderCountry) => (
+      <li
+        key={borderCountry.cca3}
+        onClick={() => navigate(`/country/${borderCountry.cca3}`)}
+        style={{
+          cursor: "pointer",
+          textDecoration: "underline",
+          marginBottom: "6px"
+        }}
+      >
+        {borderCountry.name.common}
+      </li>
+    ))}
+  </ul>
+) : (
+  <p>None</p>
+)}
+
+        </div>
+
+      </div>
     </div>
   );
 }
