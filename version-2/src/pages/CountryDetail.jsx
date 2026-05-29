@@ -1,10 +1,14 @@
 import { useParams, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 
 function CountryDetail({
   countries = [],
   savedCountries = [],
   setSavedCountries = () => {}
 }) {
+//setting states
+  const [countryCount, setCountryCount] = useState(0)
+  //react router hooks
   const { code } = useParams();
   const navigate = useNavigate();
 
@@ -24,11 +28,12 @@ function CountryDetail({
   );
 
   // ======================
-  // SAVE FUNCTION
+  // COUNTRY COUNT--POST
   // ======================
-  const handleSave = async () => {
+useEffect(() => {
+  const updateCountryCount = async () => {
     try {
-      await fetch("https://backend-answer-keys.onrender.com/save-one-country", {
+      const response = await fetch("/api/update-one-country-count", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -36,6 +41,34 @@ function CountryDetail({
         body: JSON.stringify({
           country_name: country.name.common
         })
+      });
+
+      const data = await response.json();
+
+      setCountryCount(data.count);
+    } catch (error) {
+      console.log("Error updating country count:", error);
+    }
+  };
+
+  if (country) {
+    updateCountryCount();
+  }
+}, [country]);
+
+  // ======================
+  // SAVE FUNCTION--POST
+  // ======================
+  const handleSave = async () => {
+    try {
+      await fetch("/api/save-one-country", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+ body: JSON.stringify({
+  country: country
+})
       });
 
       setSavedCountries((prev) => {
@@ -46,7 +79,7 @@ function CountryDetail({
       console.log("Error saving country:", error);
     }
   };
-
+//border countries
    const borderCountries = country?.borders?.map((borderCode) => {
   return countries.find((c) => c.cca3 === borderCode);
 }).filter(Boolean);                 
@@ -95,6 +128,11 @@ function CountryDetail({
             <strong>Saved:</strong>{" "}
             {isSaved ? "Yes" : "No"}
           </p>
+
+{/* Country View Count */}
+          <p>
+  <strong>Country Views:</strong> {countryCount}
+</p>
 
 {/* border countries */}
 {/* BORDER COUNTRIES */}
