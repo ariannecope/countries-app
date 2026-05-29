@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import CountryCard from "../components/CountryCard";
 
 function SavedCountries({ countries, savedCountries, setSavedCountries }) {
+
   const [formData, setFormData] = useState({
     name: "",
     country_name: "",
@@ -10,6 +11,7 @@ function SavedCountries({ countries, savedCountries, setSavedCountries }) {
   });
 
   const [message, setMessage] = useState("");
+  const [userName, setUserName] = useState("");
 
   // ============================
   // 🔶 RETRIEVE SAVED COUNTRIES (GET)
@@ -17,22 +19,44 @@ function SavedCountries({ countries, savedCountries, setSavedCountries }) {
   const getSavedCountries = async () => {
     try {
       const response = await fetch(
-        "https://backend-answer-keys.onrender.com/get-all-saved-countries"
+        "/api/get-all-saved-countries"
       );
+
       const data = await response.json();
 
       // API returns objects → we store ONLY names in state
       setSavedCountries(data.map(item => item.country_name));
+
     } catch (error) {
       console.log("Error:", error.message);
-
-      console.log("RAW SAVED DATA:", data);
     }
   };
 
-  // run GET on page load
+  // ============================
+  // 🔶 RETRIEVE USERS (GET)
+  // ============================
+  const getUsers = async () => {
+    try {
+      const response = await fetch(
+        "/api/get-newest-user"
+      );
+
+      const data = await response.json();
+
+      // if user exists → show welcome message
+      if (data.length > 0) {
+        setUserName(data[0].name);
+      }
+
+    } catch (error) {
+      console.log("Error:", error.message);
+    }
+  };
+
+  // run GET requests on page load
   useEffect(() => {
     getSavedCountries();
+    getUsers();
   }, []);
 
   console.log("savedCountries:", savedCountries);
@@ -43,16 +67,15 @@ function SavedCountries({ countries, savedCountries, setSavedCountries }) {
   // (map + find pattern)
   // ============================
 
-  
   // Go through saved country names
   // For each one, find full country object from countries prop
-const savedCountryObjects = savedCountries
-  .map((savedName) => {
-    return countries.find((country) => {
-      return country.name.common === savedName;
-    });
-  })
-  .filter(Boolean); // removes undefined if no match
+  const savedCountryObjects = savedCountries
+    .map((savedName) => {
+      return countries.find((country) => {
+        return country.name.common === savedName;
+      });
+    })
+    .filter(Boolean); // removes undefined if no match
 
   // DEBUG (safe now because variable exists above)
   console.log("savedCountryObjects:", savedCountryObjects);
@@ -73,7 +96,7 @@ const savedCountryObjects = savedCountries
 
     try {
       const response = await fetch(
-        "https://backend-answer-keys.onrender.com/add-one-user",
+        "/api/add-one-user",
         {
           method: "POST",
           headers: {
@@ -83,8 +106,15 @@ const savedCountryObjects = savedCountries
         }
       );
 
-      const data = await response.json();
-      setMessage(data);
+      const data = await response.text();
+
+  console.log("FORM RESPONSE:", data);
+
+// display backend message
+setMessage(data);
+
+      // update welcome message
+      setUserName(formData.name);
 
       // update saved list locally
       setSavedCountries(prev => [
@@ -92,12 +122,14 @@ const savedCountryObjects = savedCountries
         formData.country_name
       ]);
 
+      // clear form
       setFormData({
         name: "",
         country_name: "",
         email: "",
         bio: ""
       });
+
     } catch (error) {
       console.log("Error:", error.message);
     }
@@ -107,26 +139,59 @@ const savedCountryObjects = savedCountries
     <div className="saved-container">
 
       <div className="page-wrapper">
+
         <h1>Saved Countries</h1>
 
+        {/* Welcome returning user */}
+        {userName && <h2>Welcome, {userName}!</h2>}
+
         <form className="saved-form" onSubmit={handleSubmit}>
-          <input name="name" value={formData.name} onChange={handleChange} placeholder="Name" />
-          <input name="country_name" value={formData.country_name} onChange={handleChange} placeholder="Country" />
-          <input name="email" value={formData.email} onChange={handleChange} placeholder="Email" />
-          <textarea name="bio" value={formData.bio} onChange={handleChange} placeholder="Bio" />
-          <button type="submit">Save Country</button>
+
+          <input
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
+            placeholder="Name"
+          />
+
+          <input
+            name="country_name"
+            value={formData.country_name}
+            onChange={handleChange}
+            placeholder="Country"
+          />
+
+          <input
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+            placeholder="Email"
+          />
+
+          <textarea
+            name="bio"
+            value={formData.bio}
+            onChange={handleChange}
+            placeholder="Bio"
+          />
+
+          <button type="submit">Submit</button>
+
         </form>
 
         {message && <p>{message}</p>}
+
       </div>
 
       <div className="countries-grid">
+
         {savedCountryObjects.map(country => (
           <CountryCard
             key={country.cca3}
             country={country}
           />
         ))}
+
       </div>
 
     </div>
@@ -134,6 +199,5 @@ const savedCountryObjects = savedCountries
 }
 
 export default SavedCountries;
-
 
 
