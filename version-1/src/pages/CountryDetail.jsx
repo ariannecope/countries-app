@@ -1,4 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
+import { useState } from 'react';
 
 // CountryDetail component
 // Receives props from App.jsx

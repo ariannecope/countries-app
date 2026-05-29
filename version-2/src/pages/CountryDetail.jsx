@@ -6,58 +6,82 @@ function CountryDetail({
   savedCountries = [],
   setSavedCountries = () => {}
 }) {
-//setting states
-  const [countryCount, setCountryCount] = useState(0)
-  //react router hooks
+
+  // ======================
+  // STATE
+  // ======================
+  // Stores how many times this country has been viewed (from API)
+  const [countryCount, setCountryCount] = useState(0);
+
+  // ======================
+  // ROUTER HOOKS
+  // ======================
+  // Gets the country code from the URL (/:code)
   const { code } = useParams();
+
+  // Allows navigation between pages programmatically
   const navigate = useNavigate();
 
+  // ======================
+  // LOADING / SAFETY CHECKS
+  // ======================
+  // Prevents errors if countries haven't loaded yet
   if (!countries.length) {
     return <div>Loading countries...</div>;
   }
 
+  // Find the selected country using the URL code (cca3)
   const country = countries.find((c) => c.cca3 === code);
 
+  // If no match is found, show fallback UI
   if (!country) {
     return <div>Country not found</div>;
   }
 
-  // check saved state safely
+  // ======================
+  // SAVED STATE CHECK
+  // ======================
+  // Checks if this country is already in savedCountries list
   const isSaved = savedCountries.some(
     (c) => c.cca3 === country.cca3
   );
 
   // ======================
-  // COUNTRY COUNT--POST
+  // COUNTRY COUNT (POST REQUEST)
   // ======================
-useEffect(() => {
-  const updateCountryCount = async () => {
-    try {
-      const response = await fetch("/api/update-one-country-count", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          country_name: country.name.common
-        })
-      });
+  // Runs when the page loads or when the selected country changes
+  useEffect(() => {
+    const updateCountryCount = async () => {
+      try {
+        const response = await fetch("/api/update-one-country-count", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            country_name: country.name.common
+          })
+        });
 
-      const data = await response.json();
+        const data = await response.json();
+        console.log("SAVE RESPONSE:", data);
 
-      setCountryCount(data.count);
-    } catch (error) {
-      console.log("Error updating country count:", error);
+        // Store updated view count from backend
+        setCountryCount(data.count);
+
+      } catch (error) {
+        console.log("Error updating country count:", error);
+      }
+    };
+
+    // Only run if country exists
+    if (country) {
+      updateCountryCount();
     }
-  };
-
-  if (country) {
-    updateCountryCount();
-  }
-}, [country]);
+  }, [country]);
 
   // ======================
-  // SAVE FUNCTION--POST
+  // SAVE COUNTRY (POST REQUEST)
   // ======================
   const handleSave = async () => {
     try {
@@ -66,34 +90,50 @@ useEffect(() => {
         headers: {
           "Content-Type": "application/json"
         },
- body: JSON.stringify({
-  country: country
-})
+
+        // Sends full country object to backend
+        body: JSON.stringify({
+          country: country
+        })
       });
 
+      // Optimistically update savedCountries state locally
       setSavedCountries((prev) => {
+        // Prevent duplicates
         if (prev.some((c) => c.cca3 === country.cca3)) return prev;
-        return [...prev, country];
+        return [...prev, country.name.common];
       });
+
     } catch (error) {
       console.log("Error saving country:", error);
     }
   };
-//border countries
-   const borderCountries = country?.borders?.map((borderCode) => {
-  return countries.find((c) => c.cca3 === borderCode);
-}).filter(Boolean);                 
 
+  // ======================
+  // BORDER COUNTRIES
+  // ======================
+  // Converts border country codes into full country objects
+  const borderCountries = country?.borders
+    ?.map((borderCode) => {
+      return countries.find((c) => c.cca3 === borderCode);
+    })
+    .filter(Boolean); // removes undefined values if no match
+
+  // ======================
+  // RENDER
+  // ======================
   return (
     <div className="country-detail">
 
       {/* ================= TOP BUTTONS ================= */}
       <div className="top-buttons">
 
+        {/* Navigate back to homepage */}
         <button onClick={() => navigate("/")}>
           ⬅ Back
         </button>
 
+        {/* Save button (disabled if already saved) */}
         <button onClick={handleSave} disabled={isSaved}>
           {isSaved ? "Saved ✓" : "Save Country"}
         </button>
@@ -103,7 +143,7 @@ useEffect(() => {
       {/* ================= MAIN CONTENT ================= */}
       <div className="country-content">
 
-        {/* FLAG */}
+        {/* COUNTRY FLAG */}
         <div className="flag-container">
           <img
             src={
@@ -115,7 +155,7 @@ useEffect(() => {
           />
         </div>
 
-        {/* INFO */}
+        {/* COUNTRY INFORMATION */}
         <div className="country-info">
           <h1>{country.name.common}</h1>
 
@@ -124,44 +164,45 @@ useEffect(() => {
           <p><strong>Capital:</strong> {country.capital?.[0]}</p>
           <p><strong>Country Code:</strong> {country.cca3}</p>
 
+          {/* SAVED STATUS */}
           <p>
-            <strong>Saved:</strong>{" "}
-            {isSaved ? "Yes" : "No"}
+            <strong>Saved:</strong> {isSaved ? "Yes" : "No"}
           </p>
 
-{/* Country View Count */}
+          {/* VIEW COUNT FROM API */}
           <p>
-  <strong>Country Views:</strong> {countryCount}
-</p>
+            <strong>Country Views:</strong> {countryCount}
+          </p>
 
-{/* border countries */}
-{/* BORDER COUNTRIES */}
-<p>
-  <strong>Border Countries:</strong>
-</p>
+          {/* BORDER COUNTRIES SECTION */}
+          <p>
+            <strong>Border Countries:</strong>
+          </p>
 
-{borderCountries?.length ? (
-  <ul className="border-list">
-    {borderCountries.map((borderCountry) => (
-      <li
-        key={borderCountry.cca3}
-        onClick={() => navigate(`/country/${borderCountry.cca3}`)}
-        style={{
-          cursor: "pointer",
-          textDecoration: "underline",
-          marginBottom: "6px"
-        }}
-      >
-        {borderCountry.name.common}
-      </li>
-    ))}
-  </ul>
-) : (
-  <p>None</p>
-)}
+          {/* If border countries exist, show clickable list */}
+          {borderCountries?.length ? (
+            <ul className="border-list">
+              {borderCountries.map((borderCountry) => (
+                <li
+                  key={borderCountry.cca3}
+                  onClick={() =>
+                    navigate(`/country/${borderCountry.cca3}`)
+                  }
+                  style={{
+                    cursor: "pointer",
+                    textDecoration: "underline",
+                    marginBottom: "6px"
+                  }}
+                >
+                  {borderCountry.name.common}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p>None</p>
+          )}
 
         </div>
-
       </div>
     </div>
   );
