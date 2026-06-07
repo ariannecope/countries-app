@@ -78,14 +78,17 @@ function CountryDetail({
     if (country) {
       updateCountryCount();
     }
-  }, [country]);
+    //this useeffect dependency prevents unnecessary API calls.
+  }, [country?.name?.common]);
 
   // ======================
   // SAVE COUNTRY (POST REQUEST)
   // ======================
   const handleSave = async () => {
     try {
-      await fetch("/api/save-one-country", {
+
+      //“Store the result of fetch in a variable so I can check if it worked.”
+      const response = await fetch("/api/save-one-country", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -93,9 +96,16 @@ function CountryDetail({
 
         // Sends full country object to backend
         body: JSON.stringify({
-          country: country
+          country_name: country.name.common
         })
       });
+//to catch silent errors
+      if (!response.ok) {
+  throw new Error("Failed to save country");
+}
+
+const data = await response.json();
+console.log(data);
 
       // Optimistically update savedCountries state locally
       setSavedCountries((prev) => {
