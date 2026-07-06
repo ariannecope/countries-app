@@ -11,19 +11,30 @@ function App() {
   const [savedCountries, setSavedCountries] = useState([]);
 
   // GET full countries list
+//new API
   const getCountriesData = async () => {
-    try {
-      const response = await fetch(
-        'https://restcountries.com/v3.1/all?fields=name,flags,population,capital,region,cca3,borders'
-      );
+  try {
+    const response = await fetch("https://countries.dev/countries");
+    const data = await response.json();
+    setCountries(data);
+  } catch (error) {
+    console.error("Countries API error:", error);
+  }
+};
+//old API
+  // const getCountriesData = async () => {
+  //   try {
+  //     const response = await fetch(
+  //       'https://restcountries.com/v3.1/all?fields=name,flags,population,capital,region,cca3,borders'
+  //     );
 
-      const data = await response.json();
-      setCountries(data);
+  //     const data = await response.json();
+  //     setCountries(data);
 
-    } catch (error) {
-      console.error("Countries API error:", error);
-    }
-  };
+  //   } catch (error) {
+  //     console.error("Countries API error:", error);
+  //   }
+  // };
 
   // GET saved countries (IMPORTANT MISSING PIECE)
   const getSavedCountries = async () => {
@@ -51,10 +62,29 @@ function App() {
     }
   };
 
-  useEffect(() => {
-    getCountriesData();
-    getSavedCountries(); // 🔥 THIS FIXES YOUR EMPTY STATE SAFELY
-  }, []);
+//old API
+  // useEffect(() => {
+  //   getCountriesData();
+  //   getSavedCountries(); // 🔥 THIS FIXES YOUR EMPTY STATE SAFELY
+  // }, []);
+
+//new API
+
+useEffect(() => {
+  getCountriesData();
+  getSavedCountries();
+}, []);
+
+//old API
+//   useEffect(() => {
+//   const fetchCountries = async () => {
+//     const res = await fetch("https://countries.dev/countries");
+//     const data = await res.json();
+//     setCountries(data);
+//   };
+
+//   fetchCountries();
+// }, []);
 
   return (
     <div className={darkMode ? "app dark" : "app"}>

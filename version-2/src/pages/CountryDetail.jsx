@@ -30,8 +30,10 @@ function CountryDetail({
     return <div>Loading countries...</div>;
   }
 
-  // Find the selected country using the URL code (cca3)
-  const country = countries.find((c) => c.cca3 === code);
+  // Find the selected country using the URL code
+  const country = countries.find(
+    (c) => c.alpha2Code === code || c.name === code
+  );
 
   // If no match is found, show fallback UI
   if (!country) {
@@ -42,9 +44,7 @@ function CountryDetail({
   // SAVED STATE CHECK
   // ======================
   // Checks if this country is already in savedCountries list
-  const isSaved = savedCountries.some(
-    (c) => c.cca3 === country.cca3
-  );
+  const isSaved = savedCountries.includes(country.name);
 
   // ======================
   // COUNTRY COUNT (POST REQUEST)
@@ -59,7 +59,7 @@ function CountryDetail({
             "Content-Type": "application/json"
           },
           body: JSON.stringify({
-            country_name: country.name.common
+            country_name: country.name
           })
         });
 
@@ -79,7 +79,7 @@ function CountryDetail({
       updateCountryCount();
     }
     //this useeffect dependency prevents unnecessary API calls.
-  }, [country?.name?.common]);
+  }, [country?.name]);
 
   // ======================
   // SAVE COUNTRY (POST REQUEST)
@@ -96,22 +96,23 @@ function CountryDetail({
 
         // Sends full country object to backend
         body: JSON.stringify({
-          country_name: country.name.common
+          country_name: country.name
         })
       });
-//to catch silent errors
-      if (!response.ok) {
-  throw new Error("Failed to save country");
-}
 
-const data = await response.json();
-console.log(data);
+      //to catch silent errors
+      if (!response.ok) {
+        throw new Error("Failed to save country");
+      }
+
+      const data = await response.json();
+      console.log(data);
 
       // Optimistically update savedCountries state locally
       setSavedCountries((prev) => {
         // Prevent duplicates
-        if (prev.some((c) => c.cca3 === country.cca3)) return prev;
-        return [...prev, country.name.common];
+        if (prev.includes(country.name)) return prev;
+        return [...prev, country.name];
       });
 
     } catch (error) {
@@ -125,7 +126,7 @@ console.log(data);
   // Converts border country codes into full country objects
   const borderCountries = country?.borders
     ?.map((borderCode) => {
-      return countries.find((c) => c.cca3 === borderCode);
+      return countries.find((c) => c.alpha2Code === borderCode);
     })
     .filter(Boolean); // removes undefined values if no match
 
@@ -159,20 +160,21 @@ console.log(data);
             src={
               country.flags?.svg ||
               country.flags?.png ||
+              country.flag ||
               "https://via.placeholder.com/150"
             }
-            alt={`Flag of ${country.name.common}`}
+            alt={`Flag of ${country.name}`}
           />
         </div>
 
         {/* COUNTRY INFORMATION */}
         <div className="country-info">
-          <h1>{country.name.common}</h1>
+          <h1>{country.name}</h1>
 
           <p><strong>Population:</strong> {country.population}</p>
           <p><strong>Region:</strong> {country.region}</p>
-          <p><strong>Capital:</strong> {country.capital?.[0]}</p>
-          <p><strong>Country Code:</strong> {country.cca3}</p>
+          <p><strong>Capital:</strong> {country.capital}</p>
+          <p><strong>Country Code:</strong> {country.alpha2Code}</p>
 
           {/* SAVED STATUS */}
           <p>
@@ -194,9 +196,9 @@ console.log(data);
             <ul className="border-list">
               {borderCountries.map((borderCountry) => (
                 <li
-                  key={borderCountry.cca3}
+                  key={borderCountry.alpha2Code}
                   onClick={() =>
-                    navigate(`/country/${borderCountry.cca3}`)
+                    navigate(`/country/${borderCountry.alpha2Code}`)
                   }
                   style={{
                     cursor: "pointer",
@@ -204,7 +206,7 @@ console.log(data);
                     marginBottom: "6px"
                   }}
                 >
-                  {borderCountry.name.common}
+                  {borderCountry.name}
                 </li>
               ))}
             </ul>

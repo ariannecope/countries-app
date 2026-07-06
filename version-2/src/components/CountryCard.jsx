@@ -1,24 +1,26 @@
 import { Link } from "react-router-dom";
 
 function CountryCard({ country }) {
-  const name =
-    country?.name?.common ||
-    country?.country_name ||
-    "Unknown Country";
+  const name = country?.name || "Unknown Country";
 
   return (
-    <Link to={`/country/${country?.cca3 || country?.country?.cca3}`}>
+    <Link to={`/country/${country?.alpha2Code || country?.name}`}>
       <div className="country-card">
 
-        <img
-          src={
-            country?.flags?.svg ||
-            country?.flags?.png ||
-            "https://via.placeholder.com/150"
-          }
-          alt={`Flag of ${name}`}
-        />
+<img
+  src={
+    country?.flags?.png ||
+    country?.flags?.svg ||
+    country?.flag ||
+    "https://via.placeholder.com/150"
+  }
+  alt={`Flag of ${name}`}
+/>
 
+        {/* old API */}
+        {/* <h2>{name}</h2> */}
+
+        {/* new API */}
         <h2>{name}</h2>
 
         <p>
@@ -33,7 +35,7 @@ function CountryCard({ country }) {
 
         <p>
           <strong>Capital:</strong>{" "}
-          {country?.capital?.[0] ?? "N/A"}
+          {country?.capital ?? "N/A"}
         </p>
 
       </div>
