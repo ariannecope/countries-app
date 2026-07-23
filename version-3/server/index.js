@@ -103,6 +103,27 @@ async function getNewestUser() {
   return result.rows;
 }
 
+//update country count helper function that expects one piece of information-country name
+async function updateOneCountryCount(country_name) {
+
+  //On Conflict: If a country with this name already exists...increase the existing count by one.
+  const result = await db.query(
+    `
+    INSERT INTO country_counts (country_name, count)
+    VALUES ($1, 1)
+    ON CONFLICT (country_name)
+    DO UPDATE SET count = country_counts.count + 1
+    RETURNING count;
+    `,
+    [
+      country_name
+    ]
+  );
+//Send this SQL to PostgreSQL and wait for the answer. VALUES ('France', 1)
+//takes the first row and gives it back to whoever called this helper.
+  return result.rows[0];
+}
+
 // =====================
 // API Endpoints
 // =====================
@@ -167,6 +188,22 @@ app.get("/api/get-newest-user", async (req, res) => {
   // Send the user data back to React as JSON.
   // React will receive this in response.json().
   res.json(user);
+
+});
+
+// This endpoint listens for a POST request from React.
+// The frontend sends the name of the country the user is viewing.
+// The endpoint calls the updateOneCountryCount helper function,
+// which updates the country's view count in the database and returns the new count.
+// The updated count is then sent back to React so it can be displayed on the CountryDetail page.
+
+app.post("/api/update-one-country-count", async (req, res) => {
+
+  const { country_name } = req.body;
+
+  const updatedCount = await updateOneCountryCount(country_name);
+
+  res.json(updatedCount);
 
 });
 
