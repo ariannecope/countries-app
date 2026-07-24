@@ -124,6 +124,38 @@ async function updateOneCountryCount(country_name) {
   return result.rows[0];
 }
 
+// Retrieves all saved countries from the database.
+async function getAllSavedCountries() {
+
+  const result = await db.query(`
+    SELECT country_name
+    FROM saved_countries;
+  `);
+
+  return result.rows;
+
+}
+
+
+// Saves a country name into the saved_countries table.
+// If the country already exists, PostgreSQL ignores the duplicate.
+async function saveOneCountry(country_name) {
+
+  const result = await db.query(
+    `
+    INSERT INTO saved_countries (country_name)
+    VALUES ($1)
+    ON CONFLICT (country_name) DO NOTHING
+    RETURNING *;
+    `,
+    [
+      country_name
+    ]
+  );
+
+  return result.rows[0];
+}
+
 // =====================
 // API Endpoints
 // =====================
@@ -207,7 +239,34 @@ app.post("/api/update-one-country-count", async (req, res) => {
 
 });
 
+// This endpoint listens for a GET request from React.
+// React asks: "Which countries has the user saved?"
+// The endpoint calls the helper function,
+// which retrieves saved countries from PostgreSQL.
 
+app.get("/api/get-all-saved-countries", async (req, res) => {
+
+  const savedCountries = await getAllSavedCountries();
+
+  res.json(savedCountries);
+
+});
+
+
+// This endpoint listens for a POST request from React.
+// The frontend sends the selected country name.
+// The endpoint calls the helper function,
+// which saves the country in the database.
+
+app.post("/api/save-one-country", async (req, res) => {
+
+  const { country_name } = req.body;
+
+  const savedCountry = await saveOneCountry(country_name);
+
+  res.json(savedCountry);
+
+});
 
 const port = 3000;
 

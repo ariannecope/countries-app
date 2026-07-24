@@ -85,6 +85,7 @@ function CountryDetail({
   // SAVE COUNTRY (POST REQUEST)
   // ======================
   const handleSave = async () => {
+    console.log("SAVE BUTTON CLICKED");
     try {
 
       //“Store the result of fetch in a variable so I can check if it worked.”

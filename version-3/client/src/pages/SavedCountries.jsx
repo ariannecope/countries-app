@@ -16,6 +16,8 @@ function SavedCountries({ countries, savedCountries, setSavedCountries }) {
   // ============================
   // 🔶 RETRIEVE SAVED COUNTRIES (GET)
   // ============================
+
+  //this talks to our express backend, the backend then talks to SQL
   const getSavedCountries = async () => {
     try {
       const response = await fetch(
@@ -25,6 +27,7 @@ function SavedCountries({ countries, savedCountries, setSavedCountries }) {
       const data = await response.json();
 
       // API returns objects → we store ONLY names in state
+      //"Find me the full country object whose name.common is "Canada"."
       setSavedCountries(data.map(item => item.country_name));
 
     } catch (error) {
@@ -70,13 +73,13 @@ function SavedCountries({ countries, savedCountries, setSavedCountries }) {
 
   // Go through saved country names
   // For each one, find full country object from countries prop
-  const savedCountryObjects = savedCountries
-    .map((savedName) => {
-      return countries.find((country) => {
-        return country.name.common === savedName;
-      });
-    })
-    .filter(Boolean); // removes undefined if no match
+const savedCountryObjects = savedCountries
+  .map((savedName) => {
+    return countries.find((country) => {
+      return country.name === savedName;
+    });
+  })
+  .filter(Boolean);// removes undefined if no match
 
   // DEBUG (safe now because variable exists above)
   console.log("savedCountryObjects:", savedCountryObjects);
@@ -191,12 +194,12 @@ setMessage(data);
 
       <div className="countries-grid">
 
-        {savedCountryObjects.map(country => (
-          <CountryCard
-            key={country.cca3}
-            country={country}
-          />
-        ))}
+{savedCountryObjects.map(country => (
+  <CountryCard
+    key={country.alpha3Code}
+    country={country}
+  />
+))}
 
       </div>
 
