@@ -1,6 +1,5 @@
 import express from "express";
 import pg from "pg";
-import config from "./config.js";
 
 
 // =====================
@@ -13,7 +12,7 @@ import config from "./config.js";
 // Later, we will use db.query() to send SQL commands to PostgreSQL.
 
 const db = new pg.Pool({
-  connectionString: config.databaseUrl + "&uselibpqcompat=true",
+  connectionString: process.env.DATABASE_URL,
   ssl: true,
 });
 
