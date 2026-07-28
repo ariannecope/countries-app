@@ -210,7 +210,7 @@ app.post("/add-one-user", async (req, res) => {
 // The frontend asks: "Do you already have a user?"
 // The endpoint calls the helper function, which retrieves the newest user from the database.
 
-app.get("/api/get-newest-user", async (req, res) => {
+app.get("/get-newest-user", async (req, res) => {
 
   // Call the helper function.
   // The helper handles the database SELECT query.
@@ -228,7 +228,7 @@ app.get("/api/get-newest-user", async (req, res) => {
 // which updates the country's view count in the database and returns the new count.
 // The updated count is then sent back to React so it can be displayed on the CountryDetail page.
 
-app.post("/api/update-one-country-count", async (req, res) => {
+app.post("/update-one-country-count", async (req, res) => {
 
   const { country_name } = req.body;
 
@@ -243,7 +243,7 @@ app.post("/api/update-one-country-count", async (req, res) => {
 // The endpoint calls the helper function,
 // which retrieves saved countries from PostgreSQL.
 
-app.get("/api/get-all-saved-countries", async (req, res) => {
+app.get("/get-all-saved-countries", async (req, res) => {
 
   const savedCountries = await getAllSavedCountries();
 
@@ -257,7 +257,7 @@ app.get("/api/get-all-saved-countries", async (req, res) => {
 // The endpoint calls the helper function,
 // which saves the country in the database.
 
-app.post("/api/save-one-country", async (req, res) => {
+app.post("/save-one-country", async (req, res) => {
 
   const { country_name } = req.body;
 
