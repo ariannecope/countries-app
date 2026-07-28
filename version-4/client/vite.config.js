@@ -8,7 +8,7 @@
      proxy: {
        "/api": {
         // Proxy API requests from React to our local Express server
-         target: "http://localhost:3000",
+         target: "https://countries-app-znhd.onrender.com",
          changeOrigin: true,
          secure: false,
        },
