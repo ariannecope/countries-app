@@ -162,7 +162,7 @@ async function saveOneCountry(country_name) {
 // This endpoint listens for a POST request from the React form.
 // The frontend sends formData using JSON.stringify().
 // Express converts that JSON into req.body because of express.json().
-app.post("/api/add-one-user", async (req, res) => {
+app.post("/add-one-user", async (req, res) => {
 
   // Destructuring takes the properties from req.body
   // and creates individual variables we can pass into the helper function.
