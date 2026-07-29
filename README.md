@@ -14,7 +14,17 @@ https://countries-app-version-4-july-2026.netlify.app/
 
 ## 🖼️ Screenshots
 
-Add screenshots of your application here.
+### Home Page
+
+![Home Page](./screenshots/home-page.png)
+
+### Country Detail Page
+
+![Country Detail](./screenshots/country-detail.png)
+
+### Saved Countries Page
+
+![Saved Countries](./screenshots/saved-countries.png)
 
 ## ✨ Features
 
