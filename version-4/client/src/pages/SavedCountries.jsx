@@ -146,17 +146,13 @@ setMessage(data);
 
   return (
     <div className="saved-container">
-
       <div className="page-wrapper">
-
         <h1>Saved Countries</h1>
 
         {/* Welcome returning user */}
-{userName ? (
-  <h2>Welcome, {userName}!</h2>
-) : (
-  <form className="saved-form" onSubmit={handleSubmit}>
+        {userName && <h2>Welcome, {userName}!</h2>}
 
+        <form className="saved-form" onSubmit={handleSubmit}>
           <input
             name="name"
             value={formData.name}
@@ -186,23 +182,14 @@ setMessage(data);
           />
 
           <button type="submit">Submit</button>
-
-     </form>
-)}
-
+        </form>
       </div>
 
       <div className="countries-grid">
-
-{savedCountryObjects.map(country => (
-  <CountryCard
-    key={country.alpha3Code}
-    country={country}
-  />
-))}
-
+        {savedCountryObjects.map((country) => (
+          <CountryCard key={country.alpha3Code} country={country} />
+        ))}
       </div>
-
     </div>
   );
 }
