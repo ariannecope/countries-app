@@ -74,6 +74,7 @@ These are the API endpoints I built:
 Here's the link to the full API documentation:
 
 https://github.com/ariannecope/countries-app
+https://github.com/ac-backend/countries-app-instructions/blob/main/version-3/api-documentation.md
 
 ## 🗄️ Database Schema
 
