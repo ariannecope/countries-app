@@ -10,7 +10,7 @@ The purpose of this project was to practice building a full-stack application by
 
 Here's the link to view the live app:
 
-https://countries-app-version-4-july-2026.netlify.app/
+https://countries-app-version-four.netlify.app/
 
 ## 🖼️ Screenshots
 
