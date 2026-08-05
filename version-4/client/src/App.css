@@ -181,6 +181,38 @@ body {
 
 
 /*
+  RANDOM COUNTRY BUTTON
+  Action button for selecting a random country from Home.
+*/
+
+.random-button {
+  display: block;
+  margin: 0 auto 20px;
+  padding: 10px 20px;
+
+  border: none;
+  border-radius: 8px;
+
+  background-color: #7672ce;
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+
+.random-button:hover {
+  background-color: #5f5ab3;
+}
+
+
+.random-button:disabled {
+  background-color: #b3b1e0;
+  cursor: not-allowed;
+}
+
+
+/*
   DARK MODE
   Adds alternate styling when the .dark class is applied.
 */

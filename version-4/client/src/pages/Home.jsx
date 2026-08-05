@@ -1,9 +1,29 @@
 import CountryCard from "../components/CountryCard";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 function Home({ countriesData }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedRegion, setSelectedRegion] = useState("");
+  const navigate = useNavigate();
+
+  // Picks a random country and navigates to its detail page.
+  // Uses the full countriesData (not filteredCountries) on purpose, so the
+  // random pick always covers every country regardless of the current
+  // search/region filters.
+  const handleRandomCountry = () => {
+    // Guard against an empty array (e.g. countries API hasn't loaded yet,
+    // or the fetch failed) — Math.random() * 0 would otherwise look up
+    // index 0 of an empty array and silently do nothing.
+    if (!countriesData.length) return;
+
+    const randomIndex = Math.floor(Math.random() * countriesData.length);
+    const randomCountry = countriesData[randomIndex];
+
+    // Same fallback CountryCard uses for its link, so this stays consistent
+    // if a country is ever missing alpha2Code.
+    navigate(`/country/${randomCountry.alpha2Code || randomCountry.name}`);
+  };
 
   // Sort countries A → Z
   const sortedCountries = [...countriesData].sort((a, b) =>
@@ -55,6 +75,21 @@ function Home({ countriesData }) {
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
       />
+
+      {/* Random Country Button */}
+      {/* Disabled while countries are still loading so clicking never silently no-ops */}
+      <button
+        className="random-button"
+        onClick={handleRandomCountry}
+        disabled={!countriesData.length}
+        title={
+          countriesData.length
+            ? "Jump to a random country"
+            : "Loading countries..."
+        }
+      >
+        🎲 Random Country
+      </button>
 
       {/* Countries Grid */}
       <div className="countries-container">

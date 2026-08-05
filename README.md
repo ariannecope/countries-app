@@ -32,6 +32,7 @@ This is what you can do on the app:
 
 - View countries from around the world
 - Filter countries by region
+- Jump to a random country with one click
 - View country details
 - Save favorite countries
 - Prevent duplicate saved countries
